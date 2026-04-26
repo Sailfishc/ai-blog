@@ -1,0 +1,6 @@
+interface:
+  display_name: Blog Article Formatter
+  short_description: Format articles before AstroPaper publishing
+  default_prompt: Use blog-article-formatter to clean up the changed files in articles/ as publishable Chinese Markdown, then run the repo publishing script when ready.
+policy:
+  allow_implicit_invocation: true

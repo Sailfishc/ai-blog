@@ -20,6 +20,8 @@ pnpm preview
 
 ## Article Publishing
 
+Before publishing, use the project skill `blog-article-formatter` to clean the changed `articles/*.md` drafts into public Markdown. If the draft needs a deeper rewrite from raw materials, use `insight-essay-writer` first, then run the formatter pass.
+
 ```bash
 pnpm articles:sync
 pnpm articles:verify
