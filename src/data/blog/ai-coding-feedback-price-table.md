@@ -1,7 +1,7 @@
 ---
 author: 橙子
 pubDatetime: 2026-04-26T10:00:00Z
-title: "AI 编码的新价格表：代码变便宜以后，反馈变成主战场"
+title: "代码变快以后，工程师开始设计反馈"
 slug: ai-coding-feedback-price-table
 featured: true
 draft: false
@@ -9,137 +9,140 @@ tags:
   - "AI 编码"
   - "软件工程"
   - "反馈系统"
-description: "Matt Pocock 在这场 AI coding workshop 里演示了一个很典型的事故。"
+description: "Matt Pocock 的这场 AI coding workshop，表面上讲的是一套工具流：Grill Me、PRD、Kanban、TDD、Sandcastle、并行 agent。真正有价值的地方不在工具名，而在它重新划定了工程师的工作边界。"
 ---
-Matt Pocock 在这场 AI coding workshop 里演示了一个很典型的事故。
+Matt Pocock 的这场 AI coding workshop，表面上讲的是一套工具流：Grill Me、PRD、Kanban、TDD、Sandcastle、并行 agent。真正有价值的地方不在工具名，而在它重新划定了工程师的工作边界。
 
-他让 agent 给课程平台加一个 gamification 功能。前面一切看起来都很顺：先用 “Grill Me” 技能反复追问需求，再把对齐后的讨论压缩成 PRD，然后拆成 Kanban issue，让 agent 按 issue 去实现。agent 也很配合，写了 service，补了测试，跑了 type check，最后还汇报测试通过。
+以前，软件开发里最贵的环节通常是实现。一个功能从想法到代码，要经过讨论、拆分、编码、联调、测试、评审，很多团队自然会把注意力放在“怎么写得更快”。
 
-然后他打开页面手动 QA：点击完成课程，页面报错。原因是数据库里没有对应的 `PointEvents` 表。
+AI 进入之后，写代码本身开始变便宜。一个 agent 可以探索代码库，可以生成 migration，可以写 service，可以补测试，也可以在 Docker sandbox 里跑一轮又一轮。于是问题变了：当实现速度上来以后，真正限制质量的东西变成了任务边界、反馈速度、架构形状、测试质量和人工品味。
 
-这不是一个耸人听闻的失败。恰恰相反，它太普通了：AI 写了代码，AI 写了测试，自动反馈也通过了，但真实路径上仍然漏了一个集成条件。这个小错误解释了 AI 编码最重要的一件事：AI 不是让工程纪律过时，而是把工程纪律重新定价了。
+这也是 Pocock 这场 workshop 的核心信号：AI 编码不是把工程师从代码里解放出来，而是把工程师推到更靠前、更靠后的两个位置。靠前的位置是定义问题、拆任务、设计接口；靠后的位置是验证行为、评审代码、施加品味。中间那段实现，可以越来越多地交给 agent。
 
-过去，很多团队把“写代码”当作软件工程的主要成本。需求想清楚以后，剩下的是程序员一点点实现。于是流程、文档、测试、架构、code review 都像是围绕实现建立的辅助系统。
+## 任务要待在模型的清醒区
 
-AI 进入以后，这个价格表变了。生成代码变便宜了，甚至便宜到可以让 agent 在 Docker 沙箱里跑夜班。但便宜的东西会被滥用，新的瓶颈会浮出来：上下文是否干净，任务是否小到模型仍然聪明，需求是否真的对齐，反馈是否覆盖真实路径，代码结构是否让 agent 找得到正确边界，以及最后有没有人用自己的品味压住“看起来能跑”的平庸输出。
+Pocock 一开始用了 “smart zone / dumb zone” 来解释 LLM 的限制。他认为，当上下文不断膨胀，模型会逐渐变差；他给出的经验线大约是 100k tokens。更大的上下文窗口当然有用，尤其适合检索，但对编码来说，塞进更多材料并不会自动带来更好的判断。
 
-所以，这场 workshop 的真正主题不是“怎么让 AI 帮你写更多代码”，而是“怎么为 AI 建一套反馈基础设施”。
+这件事对工程实践的影响很直接：不要把大项目一次性丢给 AI。大任务需要被拆成模型可以理解、可以完成、可以验证的小任务。
 
-## 旧假设：好的规格会自然变成好的代码
+这听起来像老生常谈。Martin Fowler、《The Pragmatic Programmer》这类传统工程建议早就说过，不要一口吃太多。但 AI 让这条建议变得更硬了。人类在大任务里会焦虑、混乱、丢细节；模型在大上下文里会失焦、串线、做出奇怪决定。
 
-Matt 明确反对一种 specs-to-code 幻觉：只要不断修改规格，代码就会自己长对；如果结果不对，就回去改 spec，而不是看代码。
+所以，AI coding 的第一条纪律不是“写一个更强的 prompt”，而是控制任务尺寸。prompt 再聪明，也救不了一个没有边界的任务。
 
-这个想法为什么会有吸引力？因为在旧价格表里，沟通和实现都很贵。一个清晰规格看起来像是能减少沟通成本，也能减少实现返工。对传统团队来说，先写计划、再按计划开发，是合理的。
+Pocock 还用了另一个比喻：LLM 像《Memento》里的主角，会不断回到基础状态。很多开发者喜欢 compact，把长对话压缩成摘要继续做。他更偏向清空上下文，让 agent 每次回到一个稳定起点。
 
-但 AI 改变的不是“计划是否重要”，而是“计划在系统里的位置”。
+这背后的判断很实用：与其期待模型保留一个越来越浑浊的历史，不如把重要状态沉淀成明确资产，再让下一轮 agent 从干净上下文出发。模型会忘，所以工程师要决定什么值得被写下来，什么应该丢掉。
 
-在 Matt 的流程里，PRD 不是代码编译器。PRD 是目的地文档：它记录经过提问、争论和取舍之后，人和 agent 形成的共享设计概念。真正的关键不是 PRD 写得多漂亮，而是在 PRD 之前，agent 通过 Grill Me 一次次逼问：积分来源是什么？历史记录要不要回填？streak 是否计分？UI 放在哪里？哪些行为容易被刷分？
+## 对齐先于计划
 
-他甚至说，自己通常不仔细读生成出来的 PRD。因为如果前面的 grilling 已经让人和模型对齐，PRD 更像是一次总结能力测试。这里的判断很反直觉：不是文档越精修越好，而是对齐过程越可靠，文档才越能变成可用资产。
+这场 workshop 里最值得借鉴的环节，是 Pocock 的 “Grill Me” 技术。
 
-这会改变团队投入时间的位置。你不应该把大量精力花在润色一份“完美 PRD”上，而应该把精力放在让 agent 暴露假设、追问边界、逼出阻塞项上。
+当他拿到一个模糊需求，比如“给课程平台加 gamification，提高留存”，他没有立刻让 AI 写计划，而是让 AI 反过来盘问自己。积分从哪些行为来？看视频算不算？历史进度要不要回填？等级曲线怎么设？UI 放在哪里？哪些东西暂时不做？
 
-## 新价格表：实现便宜，反馈昂贵
+这一步的目标不是产出文档，而是建立 shared design concept，也就是人和 agent 对同一个问题形成共同理解。
 
-这场 workshop 反复出现同一个机制：凡是过去靠人慢慢做的实现动作，现在都可以被 agent 加速；凡是过去被当作工程习惯的反馈动作，现在变成了性能上限。
+这点很关键。很多团队使用 AI 的失败路径，是从“模糊想法”直接跳到“生成代码”。中间缺少对齐，于是后面所有速度都会放大偏差。代码写得越快，返工也越快。
 
-| 过去的成本 | 现在的变化 | 新瓶颈 |
-|---|---|---|
-| 写一个 service 很慢 | agent 可以快速生成 service 和测试 | service 边界是否选对 |
-| 多轮探索代码库占用人力 | sub-agent 可以烧掉 93.7k tokens 后只回传摘要 | 主上下文是否保持干净 |
-| 长计划看起来必要 | PRD 可以从对齐会话中自动总结 | 对齐是否真的发生 |
-| 按数据库、API、前端分层开发很自然 | AI 特别容易横向写完一层再写下一层 | 是否能早得到端到端反馈 |
-| 测试是质量保障 | TDD 变成 agent 不作弊的约束 | 测试是否先于实现、是否打到真实边界 |
-| 文档能帮助后来者 | 旧 PRD 可能误导未来 agent | 文档生命周期是否受控 |
-| code review 是最后一道门 | agent 输出变多，review 压力上升 | 人把品味放在哪里 |
+Grill Me 的价值在于，它把需求里的沉默假设暴露出来。用户说“加游戏化”，真正的问题可能是留存，也可能是激励，也可能是课程进度反馈不足。积分、 streak、等级、排行榜听起来都合理，但它们会带来不同的产品后果和工程后果。
 
-这张表解释了为什么 Matt 一直强调 smart zone、Memento、vertical slices、TDD、deep modules 和 manual QA。它们看似是不同技巧，其实都在回答同一个问题：当代码生成变便宜以后，什么反馈能让便宜的代码不污染系统？
+在 AI 时代，计划本身没有那么稀缺。真正稀缺的是人和 agent 对“为什么做、做到什么程度、哪些东西不做”的共同判断。
 
-## 第一层反馈：上下文反馈
+## PRD 是目的地，不是施工图
 
-Matt 引用 Dex Horthy 的说法，把 LLM 的工作区分成 smart zone 和 dumb zone。他的经验线大约是 100k tokens：上下文越长，attention 关系越拥挤，模型越容易做出奇怪决定。即使有 1 million context window，他也认为这对检索更有用，对编码不等于更聪明。
+对齐之后，Pocock 会把讨论总结成 PRD。他把 PRD 称为 destination document，目的地文档。它描述问题、方案、用户故事、实现决策、测试决策，以及范围外事项。
 
-这解释了他为什么讨厌无休止 compact。compact 会把旧会话压缩成历史沉积物，继续塞进下一轮。Matt 更愿意把 LLM 当成《Memento》里的主角：它会忘，那就接受它会忘；每次清空回到一个稳定、短小、可预测的系统提示。
+有意思的是，他说自己通常不会仔细读这份 PRD。原因也很直接：如果前面的 Grill Me 已经建立了共同理解，PRD 主要是在考验模型的总结能力，而模型很擅长总结。工程师真正要投入判断的地方，不是把每个句子润色到完美，而是确认任务是否已经足够清楚，可以进入下一阶段。
 
-这不是洁癖，而是成本控制。上下文不是越多越好，上下文是一种会污染判断的资源。好的 AI 编码流程，需要把探索、实现、测试分成可清空、可重启、可交接的阶段。
+这对很多团队是个提醒。AI 工作流里的文档不应该自动膨胀成新的官僚系统。PRD 的价值是把对齐结果变成可传递的目的地，让后面的任务拆分和实现有参照。它不需要成为一份永久神圣的说明书。
 
-sub-agent 的价值也在这里。探索 agent 可以在独立上下文里花掉大量 tokens，看完整个代码库，然后只把有用摘要回传给 orchestrator。主 agent 不必背着所有探索过程继续实现。换句话说，sub-agent 不是为了显得高级，而是为了隔离上下文成本。
+Pocock 对文档腐烂也很警惕。他提到，如果一个旧 PRD 留在仓库里，一个月后 agent 可能把它当成当前事实；但实际代码结构、命名、需求都已经变化。于是旧文档开始误导新 agent。
 
-## 第二层反馈：任务反馈
+所以，AI coding 需要更严格地区分两类材料：当前事实和历史记录。历史可以保留在 issue 系统、关闭状态、审计记录里；仓库里的长期文档必须非常克制。文档一旦过期，它就不再是知识，而是噪音。
 
-AI 很喜欢横向开发。
+## 任务拆分要让反馈尽早出现
 
-它会先做数据库 schema，再做 API，再做前端。这个顺序在人类看来很自然，因为系统本来就有层次。但它的问题是：直到很晚，你才知道这些层能不能一起工作。
+有了 PRD，下一步不是生成传统的多阶段计划，而是拆成 Kanban 上可以独立领取的 issue。
 
-Matt 用 Pragmatic Programmer 里的 tracer bullets 解释更好的拆法：不要横着切，要竖着切。第一张 issue 不应该是“创建 gamification service”，而应该是“用户完成课程后获得积分，并能在 dashboard 上看到”。这意味着同一小片工作会穿过 schema、service、route 和 UI，哪怕每一层只做最小实现。
+这里 Pocock 强调 vertical slice，也就是 tracer bullet。AI 很容易横向开发：第一阶段做数据库，第二阶段做 API，第三阶段做前端。这个顺序看起来整齐，但危险在于，系统到最后才有端到端反馈。等你发现数据库、服务层、UI 之间没有真正接起来，已经堆了太多代码。
 
-竖切的价值不是更优雅，而是反馈更早。agent 写完一小片，你马上能跑真实路径，马上能发现缺表、缺迁移、UI 没接上、服务边界不对。横向任务看起来整齐，但它把坏消息延迟到最后；竖向任务看起来粗糙，却把坏消息提前暴露。
+更好的第一片任务，是“完成课程后获得积分，并在 dashboard 上看到结果”。它可能包含 schema、service、route、UI 的最小改动，但它给了一个可运行、可观察、可验证的完整闭环。
 
-这也是 Kanban 比线性 multi-phase plan 更适合 agent 的原因。线性计划只有一个 agent 能顺着跑；带依赖关系的 issue board 可以让多个 agent 同时拿不互相阻塞的任务。真正的并行化不是“多开几个模型”，而是先把任务拆成彼此边界清楚、反馈路径完整、依赖关系明确的工作包。
+这就是 tracer bullet 的意义：先让一颗带光的子弹飞出去，看方向准不准。
 
-## 第三层反馈：代码反馈
+AI agent 最需要这种反馈。没有反馈，它只是持续生成文本；有了端到端反馈，它才在一个工程系统里工作。测试、类型检查、运行页面、人工 QA，都是让 agent 从“写代码”进入“修正行为”的方式。
 
-TDD 在这套流程里不是信仰，而是防作弊机制。
+## 工程师该怎样分配 AI 任务
 
-Matt 观察到，如果让 agent 先写完整实现，再补测试，agent 很容易写出表面测试。它知道自己刚写了什么，于是测试会贴着实现走，而不是贴着行为走。红绿重构反过来逼它先描述失败，再写代码通过。测试先出现，agent 就不容易用实现细节糊弄测试。
+下面这张表可以直接用在团队任务拆分会上。它的目的不是判断“要不要用 AI”，而是判断人和 agent 各自该站在哪里。
 
-但测试还只是反馈基础设施的一部分。Matt 更强调模块形状。
+| 任务类型 | 默认负责人 | 进入条件 | 需要的反馈 | 退出条件 | 容易出错的地方 |
+|---|---|---|---|---|---|
+| 模糊需求澄清 | 人主导，AI 追问 | 只有一句想法、业务目标不清 | 领域专家回答、反例、范围外事项 | 关键假设被问完，能说清什么先不做 | 过早让 AI 写计划 |
+| PRD / 目的地文档 | AI 起草，人抽查方向 | 已有充分对齐记录 | 用户故事、实现决策、测试决策 | 团队知道终点和完成定义 | 把 PRD 当长期事实留在仓库里 |
+| 任务拆分 | 人审核，AI 提案 | PRD 已经稳定 | vertical slice、依赖关系、阻塞项 | 每个 issue 可独立领取，有清楚验收 | 拆成数据库/API/前端这种横向阶段 |
+| 核心实现 | AI 主做 | issue 边界清楚，有测试入口 | TDD、类型检查、自动测试、局部运行 | 有提交、有测试、有可 QA 的行为 | 让 agent 一次做太多 issue |
+| 自动 review | 独立 AI reviewer | 实现已有 diff | 编码标准、测试质量、架构约束 | 明确指出 bug 和风险 | 在同一个臃肿上下文里自审 |
+| 手工 QA | 人主导 | 功能可以跑起来 | 页面、交互、真实数据、用户路径 | 行为符合预期，体验过得去 | 试图把品味也完全自动化 |
+| 架构收敛 | 人设计接口，AI 填内部 | 模块边界开始混乱 | 深模块接口、集成测试边界 | 人能记住系统形状，agent 能测试内部 | 让 AI 生成大量浅模块 |
 
-他借 John Ousterhout 的 deep module / shallow module 概念说明：一堆浅模块会让 agent 在依赖图里迷路，也让测试边界变得尴尬。你到底要测每个小函数，还是 mock 掉一串依赖？AI 在这种结构里容易补出一堆碎测试，看起来覆盖很多，实际抓不住关键行为。
+这张表背后的原则很简单：判断、边界、品味留给人；可验证的实现循环交给 agent。人不需要手写每一行代码，但要牢牢掌握任务如何被定义、如何被观察、如何被合并。
 
-深模块相反：接口窄，内部深，行为边界清楚。人负责设计模块接口，agent 可以实现模块内部。这样工程师仍然保留代码库的心理地图：我知道这些灰盒做什么、接口是什么、行为如何被测试，但我不必逐行记住内部实现。
+## TDD 变成 AI 的天花板
 
-这可能是 AI 编码时代最实际的架构建议：不要把架构权交给 agent。你可以把实现权交出去，但模块边界、接口形状、测试边界必须由人看住。
+Pocock 对 TDD 的态度很强：想让 agent 写出可靠代码，TDD 非常关键。
 
-## 第四层反馈：人的品味反馈
+原因不只是“测试很重要”。在 AI 工作流里，测试是 agent 的感官。没有测试，agent 就是在黑箱里生成代码；有测试，它才知道自己刚才做的事情有没有推进目标。
 
-Matt 最后仍然把 manual QA 放在核心位置。
+他特别提到 red-green-refactor：先写失败测试，再写实现，再重构。这样做可以减少 AI “作弊式测试”的问题。很多 agent 如果先写完整实现，再回头补测试，就容易写出只验证表面、甚至迎合实现细节的测试。先让测试失败，可以迫使它在实现前建立一个行为边界。
 
-这不是因为他不相信自动化。恰恰相反，他的流程里有 type check、test、agent review、Docker sandbox、worktree、merge agent、reviewer agent。但他仍然说，QA 是把人的意见重新施加到代码库上的地方。
+这也解释了为什么很多团队觉得 AI 在自家代码库里表现很差。问题可能不在模型，而在反馈系统。类型检查慢、测试缺失、边界不清、前端无法自动验证，都会拉低 agent 的上限。
 
-这句话很重要。AI 能让很多团队更快地产生“可运行的软件”，但“可运行”不是“值得使用”。尤其在前端，Matt 认为 AI 还很难真正判断一个成熟代码库里的界面是否好用。可以让它做 throwaway prototype，生成几个可点击方案供人选择；但最终的视觉判断、交互取舍和产品味道，仍然要靠人。
+Pocock 说得很直接：反馈循环的质量，就是 AI 编码能力的天花板。
 
-所以 AI 编码不会减少 review，它很可能增加 review。因为实现吞吐上去了，审查、QA、设计判断就成了拥堵点。那些想把 idea、research、prototype、implementation、QA 全部自动化的团队，最后很容易得到一种东西：能跑，但没有味道。
+## 深模块让人保留系统感
 
-## 这套机制在哪里会失效
+这场 workshop 最有工程含量的部分，是 deep modules。
 
-第一，反馈基础设施太弱时会失效。没有测试、没有 type check、没有可重复启动环境、没有端到端路径，agent 就是在盲写。你给它再好的 prompt，也只是让它更有礼貌地猜。
+Pocock 借用了 John Ousterhout 的说法：浅模块暴露很多小接口，内部功能很少；深模块暴露简单接口，内部隐藏大量功能。对 AI 来说，浅模块很难处理，因为依赖图分散、测试边界模糊、调用关系需要一路追踪。它容易在许多小文件之间生成更多胶水，最后让系统更碎。
 
-第二，任务边界太大时会失效。超过 smart zone 后，模型会忘掉局部约束，开始做看似合理但彼此冲突的决定。大上下文能帮检索，不自动等于好工程判断。
+深模块对 AI 更友好。人可以设计接口，定义这个模块做什么、输入输出是什么、行为如何验证；agent 可以实现内部细节。测试也可以围绕这个深模块建立更有意义的边界。
 
-第三，团队把文档当永久真相时会失效。旧 PRD 如果长期留在 repo 里，未来 agent 可能把它当当前事实。Matt 把这叫 doc rot。对 agent 来说，过期文档不是中性背景，而是有害输入。
+这对工程师有一个额外好处：保留代码库的 mental model。
 
-第四，人放弃代码库心理地图时会失效。速度越快，越容易觉得自己不再需要理解代码。但如果模块形状也被 agent 决定，你得到的不是杠杆，而是一个你无法改进的系统。
+AI 让开发速度变快，也让人更容易失去对代码的掌控感。你知道功能做完了，但不再清楚系统长什么样。深模块提供了一种折中：工程师不必记住每行代码，但要记住系统里的大形状。哪些模块存在，它们的接口是什么，它们承担什么责任，它们之间如何连接。
 
-## 工程师的新工作不是少了，而是换了位置
+这比“全程手写”更现实，也比“全交给 AI”更可靠。
 
-如果把这场 workshop 压成一个决策框架，我会这样用：
+## 人的品味变成最后一道质量系统
 
-| 场景 | 应该交给 AI | 人必须保留 |
-|---|---|---|
-| 需求早期模糊 | 让 AI relentlessly grill you | 回答取舍，确认边界 |
-| 目标已对齐 | 让 AI 总结 PRD | 判断是否真的达成共享设计概念 |
-| 实现任务拆分 | 让 AI 起草 issue board | 把横向任务改成竖向 slice |
-| 代码实现 | 让 agent 在 sandbox/worktree 里做 AFK 任务 | 设计模块接口和测试边界 |
-| 自动验证 | 让 AI 跑 test、type check、review | 判断反馈是否覆盖真实风险 |
-| UI 和产品体验 | 让 AI 做 throwaway prototype | 用人的眼睛做 QA 和品味判断 |
+Pocock 在 demo 里让 agent 做了一个 gamification 功能。它写了 migration、service、测试，也跑了 typecheck。然后手工点页面时，还是遇到了 SQLite table 相关错误。
 
-AI 编码让工程师不用手写那么多代码，但它没有让工程师不用做工程。相反，它把工程师推到了更靠前、更抽象、也更难逃避的位置：定义问题，设计反馈，切分任务，保护边界，审查结果。
+这很真实。自动反馈能抓住很多问题，但仍然覆盖不了全部。尤其是前端、产品体验、真实用户路径、交互细节，今天的 agent 还很难完全替代人眼。
 
-过去，一个强工程师的价值常常体现在“我能把复杂实现写出来”。现在，这种价值正在迁移到另一句话上：我能不能让一个便宜、快速、健忘、会自信犯错的实现者，在正确的反馈系统里持续产出好代码？
+所以 QA 在这个流程里不只是“验收”。QA 是工程师把品味重新施加到系统上的地方。它会产生新的 issue，回到 Kanban，再让 agent 继续实现。实现可以 AFK，品味不能 AFK。
 
-这就是 AI coding 的新价格表。
+这也是 AI coding 对工程师最实际的要求：你会做更多 review，而不是更少。你会更少敲重复代码，但会更多判断测试是否有效、接口是否干净、任务是否过大、agent 是否把系统带偏。
 
-代码变便宜以后，真正昂贵的不是实现，而是让实现持续接近真实。
+代码变快以后，工程师的工作没有消失。它变得更像设计一个高质量反馈系统。
 
----
+## AI 编码的成熟标志
 
-## Source Notes
+很多人评价 AI coding，还停留在“它能不能一次写对”。这个标准太粗了。真实工程里，人也不会一次写对。成熟的标准应该是：系统能不能让错误尽早暴露，让修正足够便宜，让人始终掌握方向。
 
-Source: `[FULL WORKSHOP] AI Coding For Real Engineers - Matt Pocock, AI Hero (@mattpocockuk ).md`, published 2026-04-24, saved 2026-04-26.
+Pocock 的整套流程可以压缩成一句话：
 
-Compact source map: smart zone / dumb zone around 100k tokens; Memento-style context clearing vs compact sediment; tiny system prompt; Grill Me skill for shared design concept; Sarah Chen gamification example; 40-100 question grilling sessions; sub-agent spent 93.7k tokens while parent context stayed smaller; PRD as destination document; Matt says he often does not read the PRD after alignment; vertical slices / tracer bullets over horizontal database-API-frontend phases; Kanban issues with blockers and AFK classification; Ralph loop over local issue files; TDD red-green-refactor to reduce test cheating; automated tests and type check as AI performance ceiling; manual QA caught missing `PointEvents` table; “human touch” prevents slop; deep modules vs shallow modules; doc rot from stale PRDs; push vs pull coding standards; Sandcastle with Docker sandbox, worktree, implementer, reviewer, merger.
+先用人类判断建立方向，再用反馈系统释放 agent。
 
-Thesis tournament winner: “AI 编码的新价格表” scored highest because it explains context limits, Grill Me, PRD, Kanban, TDD, deep modules, manual QA, doc rot, and reviewer pressure under one mechanism: implementation got cheaper, feedback became scarce.
+方向包括需求澄清、范围收敛、模块接口、任务依赖。反馈包括 TDD、类型检查、自动 review、手工 QA、Kanban 回流。方向不清，AI 会快速跑偏；反馈不足，AI 会自信地产出垃圾；架构太碎，AI 会把系统搅得更碎；人完全退出，产品会失去味道。
 
-Quality score: 92/100. Strongest dimensions: cost-structure clarity, source-material density, action framework. Lowest dimensions: external validation beyond the single workshop source, which is intentionally limited because the request was attachment-based.
+AI coding 对工程师真正的挑战，不是学习某个新工具，而是重新理解自己的职责。
+
+以前，工程师主要靠实现能力证明价值。现在，实现正在变便宜，能把实现变成可靠系统的人更值钱。这个人知道什么时候该问问题，什么时候该写 PRD，什么时候该拆 vertical slice，什么时候该让 agent 跑，什么时候该停下来亲自点一遍页面。
+
+未来优秀的工程师，不只是会用 AI 写代码的人。
+
+他们会设计让 AI 写出好代码的环境。
+
+## 资料来源
+
+本文基于 Matt Pocock 在 AI Engineer workshop《AI Coding For Real Engineers》中的公开 transcript 和材料摘要整理写作，材料保存时间为 2026-04-26。
