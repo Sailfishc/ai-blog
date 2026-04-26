@@ -20,7 +20,12 @@ pnpm preview
 
 Cloudflare Pages build settings:
 
+- Framework preset: `Astro`
 - Build command: `pnpm build`
 - Build output directory: `dist`
+- Root directory: `/`
+- Environment variables:
+  - `NODE_VERSION=22`
+  - `PNPM_VERSION=10`
 
 Production domain: `https://ai.sailfishc.com/`
