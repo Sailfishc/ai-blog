@@ -11,6 +11,9 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro check && astro build && pagefind --site dist && cp -r dist/pagefind public/",
+    "articles:sync": "node scripts/publish-articles.mjs --sync-only",
+    "articles:verify": "node scripts/publish-articles.mjs",
+    "articles:publish": "node scripts/publish-articles.mjs --commit --push",
     "preview": "astro preview",
     "sync": "astro sync",
     "astro": "astro",

@@ -18,6 +18,20 @@ pnpm build
 pnpm preview
 ```
 
+## Article Publishing
+
+```bash
+pnpm articles:sync
+pnpm articles:verify
+pnpm articles:publish
+```
+
+- `articles:sync`: convert `articles/*.md` into AstroPaper posts in `src/data/blog/`
+- `articles:verify`: sync articles, run `pnpm build`, then run `pnpm exec wrangler deploy --dry-run`
+- `articles:publish`: verify, commit changed article files, then push `main`
+
+The sync keeps each published post's existing frontmatter metadata, and only replaces `title`, `description`, and body content from the source article.
+
 Cloudflare Workers Static Assets build settings:
 
 - Build command: `pnpm run build`
