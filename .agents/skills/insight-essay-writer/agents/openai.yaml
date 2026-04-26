@@ -1,0 +1,6 @@
+interface:
+  display_name: Insight Essay Writer
+  short_description: Publishable Chinese longform essays from source materials
+  default_prompt: Use insight-essay-writer to turn the attached materials into a publishable Chinese essay with deep insight, clean title, honest sourcing, and one usable reader decision tool.
+policy:
+  allow_implicit_invocation: true
