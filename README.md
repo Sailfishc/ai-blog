@@ -18,12 +18,13 @@ pnpm build
 pnpm preview
 ```
 
-Cloudflare Pages build settings:
+Cloudflare Workers Static Assets build settings:
 
-- Framework preset: `Astro`
-- Build command: `pnpm build`
-- Build output directory: `dist`
+- Build command: `pnpm run build`
+- Deploy command: `pnpm exec wrangler deploy`
+- Non-production branch deploy command: `pnpm exec wrangler versions upload`
 - Root directory: `/`
+- Static assets directory: `dist` via `wrangler.jsonc`
 - Environment variables:
   - `NODE_VERSION=22`
   - `PNPM_VERSION=10`
