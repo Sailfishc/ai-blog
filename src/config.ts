@@ -1,9 +1,9 @@
 export const SITE = {
-  website: "https://writing.pages.dev/", // replace this with your deployed domain
-  author: "Zhang Cheng",
-  profile: "",
-  desc: "关于 AI、产品、工程和写作的文章。",
-  title: "Writing",
+  website: "https://ai.sailfishc.com/",
+  author: "橙子",
+  profile: "https://github.com/sailfishc",
+  desc: "橙子的博客，关于 AI、产品、工程和写作的文章。",
+  title: "橙子的博客",
   ogImage: "astropaper-og.jpg",
   lightAndDarkMode: true,
   postPerIndex: 4,

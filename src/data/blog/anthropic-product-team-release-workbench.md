@@ -1,5 +1,5 @@
 ---
-author: Zhang Cheng
+author: 橙子
 pubDatetime: 2026-04-26T10:10:00Z
 title: "Anthropic 产品团队快的不是执行，而是把发布变成了作业场"
 slug: anthropic-product-team-release-workbench

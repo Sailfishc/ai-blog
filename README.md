@@ -1,4 +1,4 @@
-# Writing
+# 橙子的博客
 
 AstroPaper-based static blog for publishing Markdown essays.
 
@@ -23,4 +23,4 @@ Cloudflare Pages build settings:
 - Build command: `pnpm build`
 - Build output directory: `dist`
 
-Update `SITE.website` in `src/config.ts` before production deployment.
+Production domain: `https://ai.sailfishc.com/`

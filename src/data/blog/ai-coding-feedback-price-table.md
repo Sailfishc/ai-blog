@@ -1,5 +1,5 @@
 ---
-author: Zhang Cheng
+author: 橙子
 pubDatetime: 2026-04-26T10:00:00Z
 title: "AI 编码的新价格表：代码变便宜以后，反馈变成主战场"
 slug: ai-coding-feedback-price-table
